@@ -1,0 +1,178 @@
+{{#if details.totalResults.data.report}}
+  {{#if (eq details.totalResults.data.report.most_abused_tld true)}}
+    <div>
+        <span class="p-key">Domain TLD: </span>
+        <span class="p-value" style="color:red"><b>RISKY</b></span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.alexa_top_10k true)}}
+    <div>
+        <span class="p-key">Alexa Rank: </span>
+        <span class="p-value">Top 10K</span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.alexa_top_100k true)}}
+    <div>
+        <span class="p-key">Alexa Rank: </span>
+        <span class="p-value">Top 100K</span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.alexa_top_250k true)}}
+    <div>
+        <span class="p-key">Alexa Rank: </span>
+        <span class="p-value">Top 250K</span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.category.is_free_hosting true)}}
+    <div>
+        <span class="p-key">Free Hosting Provider: </span>
+        <span class="p-value">True</span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.category.is_anonymizer true)}}
+    <div>
+        <span class="p-key">Anonymizer Service: </span>
+        <span class="p-value">True</span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.category.is_url_shortener true)}}
+    <div>
+        <span class="p-key">URL Shortener Service: </span>
+        <span class="p-value">True</span>
+    </div>
+  {{/if}}
+  {{#if (eq details.totalResults.data.report.category.is_free_dynamic_dns true)}}
+    <div>
+        <span class="p-key">Free Dynamic DNS Provider: </span>
+        <span class="p-value">True</span>
+    </div>
+  {{/if}}
+  {{#if details.totalResults.data.report.server}}
+    <h1 class="p-title">
+      {{fa-icon "server" fixedWidth=true}} Server Details
+    </h1>
+    {{#if details.totalResults.data.report.server.ip}}
+      <div>
+          <span class="p-key">Server IP: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.ip}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.reverse_dns}}
+      <div>
+          <span class="p-key">Reverse DNS: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.reverse_dns}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.continent_name}}
+      <div>
+          <span class="p-key">Continent: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.continent_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.country_name}}
+      <div>
+          <span class="p-key">Country: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.country_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.region_name}}
+      <div>
+          <span class="p-key">Region: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.region_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.city_name}}
+      <div>
+          <span class="p-key">City: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.city_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.latitude}}
+      <div>
+          <span class="p-key">Lat/Long: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.latitude}} / {{details.totalResults.data.report.server.longitude}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.server.isp}}
+      <div>
+          <span class="p-key">ISP: </span>
+          <span class="p-value">{{details.totalResults.data.report.server.isp}}</span>
+      </div>
+    {{/if}}
+  {{/if}}
+  {{#if details.totalResults.data.report.information}}
+    <h1 class="p-title">
+      {{fa-icon "server" fixedWidth=true}} Server Details
+    </h1>
+    {{#if details.totalResults.data.report.information.reverse_dns}}
+      <div>
+          <span class="p-key">Reverse DNS: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.reverse_dns}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.information.continent_name}}
+      <div>
+          <span class="p-key">Continent: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.continent_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.information.country_name}}
+      <div>
+          <span class="p-key">Country: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.country_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.information.region_name}}
+      <div>
+          <span class="p-key">Region: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.region_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.information.city_name}}
+      <div>
+          <span class="p-key">City: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.city_name}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.information.latitude}}
+      <div>
+          <span class="p-key">Lat/Long: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.latitude}} / {{details.totalResults.data.report.information.longitude}}</span>
+      </div>
+    {{/if}}
+    {{#if details.totalResults.data.report.information.isp}}
+      <div>
+          <span class="p-key">ISP: </span>
+          <span class="p-value">{{details.totalResults.data.report.information.isp}}</span>
+      </div>
+    {{/if}}
+  {{/if}}
+{{/if}}
+{{#if details.detectedResults}}
+  <h1 class="p-title">
+    {{fa-icon "bug" fixedWidth=true}} Blacklist Engine Details
+  </h1>
+  {{#each details.detectedResults as |hit index|}}
+    <h1 class="p-title">
+      Engine #{{inc index}}
+    </h1>
+    {{#if hit.engine}}
+      <div>
+          <span class="p-key">Name: </span>
+          <span class="p-value">{{hit.engine}}</span>
+      </div>
+    {{/if}}
+    {{#if hit.confidence}}
+      <div>
+          <span class="p-key">Confidence: </span>
+          <span class="p-value">{{hit.confidence}}</span>
+      </div>
+    {{/if}}
+    {{#if hit.reference}}
+      <div>
+          <span class="p-key">Reference: </span>
+          <span class="p-value">{{hit.reference}}</span>
+      </div>
+    {{/if}}
+  {{/each}}
+{{/if}}

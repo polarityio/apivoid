@@ -1,0 +1,8 @@
+<span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
+   <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
+   <span class="integration-text-color">Risk Score: {{details.totalResults.data.report.risk_score.result}}</span>
+</span>
+<span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
+   <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
+   <span class="integration-text-color">Detection Ratio: {{details.totalResults.data.report.blacklists.detections}}/{{details.totalResults.data.report.blacklists.engines_count}}</span>
+</span>
