@@ -3,6 +3,7 @@
 const request = require('request');
 const config = require('./config/config');
 const async = require('async');
+const get = require('lodash.get');
 const fs = require('fs');
 
 let Logger;
@@ -47,7 +48,6 @@ function doLookup(entities, options, cb) {
   let lookupResults = [];
   let tasks = [];
 
-  Logger.debug(entities);
   entities.forEach((entity) => {
     let requestOptions = {
       method: 'GET',
@@ -94,15 +94,20 @@ function doLookup(entities, options, cb) {
     }
 
     results.forEach((result) => {
-      if (!result.body || result.body === null || !result.body.success || result.body.success != true) {
+      if (
+        !result.body ||
+        result.body === null ||
+        !result.body.success ||
+        result.body.success != true
+      ) {
         lookupResults.push({
           entity: result.entity,
           data: null
         });
       } else {
         let validResults = [];
-        
-        Logger.trace({result}, "Logging lookup results");
+
+        Logger.trace({ result }, 'Logging lookup results');
 
         for (let i = 0; i < result.body.data.report.blacklists.engines_count; i++) {
           const engines = result.body.data.report.blacklists.engines[i];
@@ -110,7 +115,7 @@ function doLookup(entities, options, cb) {
           if (engines.detected === true) {
             validResults.push(engines);
           }
-          Logger.trace({valid: validResults}, "logging blacklist stuff");
+          Logger.trace({ valid: validResults }, 'logging blacklist stuff');
         }
 
         if (options.blocklistedOnly === true && validResults.length === 0) {
@@ -119,12 +124,16 @@ function doLookup(entities, options, cb) {
             data: null
           });
         } else {
+          const anonymityTags = getAnonymityTags(result.body);
+          const categoryTags = getCategoryTags(result.body);
           lookupResults.push({
             entity: result.entity,
             data: {
-              summary: [],
+              summary: getSummaryTags(result.body).concat(anonymityTags).concat(categoryTags),
               details: {
                 totalResults: result.body,
+                anonymityTags,
+                categoryTags,
                 detectedResults: validResults
               }
             }
@@ -138,6 +147,76 @@ function doLookup(entities, options, cb) {
   });
 }
 
+function getCategoryTags(body) {
+  const tags = [];
+
+  const isFreeHosting = get(body, 'data.report.category.is_free_hosting', false);
+  const isAnonymizer = get(body, 'data.report.category.is_anonymizer', false);
+  const isUrlShortener = get(body, 'data.report.category.is_url_shortener', false);
+  const isFreeDynamicDns = get(body, 'data.report.category.is_free_dynamic_dns', false);
+
+  if (isFreeHosting) {
+    tags.push('Free Hosting');
+  }
+  if (isAnonymizer) {
+    tags.push('Anonymizer');
+  }
+
+  if (isUrlShortener) {
+    tags.push('URL Shortener');
+  }
+
+  if (isFreeDynamicDns) {
+    tags.push('Free Dynamic DNS');
+  }
+
+  return tags;
+}
+
+function getAnonymityTags(body) {
+  const tags = [];
+
+  const isProxy = get(body, 'data.report.anonymity.is_proxy', false);
+  const isWebProxy = get(body, 'data.report.anonymity.is_webproxy', false);
+  const isVPN = get(body, 'data.report.anonymity.is_vpn', false);
+  const isHosting = get(body, 'data.report.anonymity.is_hosting', false);
+  const isTor = get(body, 'data.report.anonymity.is_tor', false);
+
+  if (isProxy) {
+    tags.push('Proxy');
+  }
+  if (isWebProxy) {
+    tags.push('Web Proxy');
+  }
+
+  if (isVPN) {
+    tags.push('VPN');
+  }
+
+  if (isHosting) {
+    tags.push('Hosting');
+  }
+
+  if (isTor) {
+    tags.push('Tor');
+  }
+
+  return tags;
+}
+
+function getSummaryTags(body) {
+  const tags = [];
+  tags.push(`Risk Score: ${get(body, 'data.report.risk_score.result', 'Not Available')}`);
+  tags.push(
+    `Detection Ratio: ${get(body, 'data.report.blacklists.detections')} / ${get(
+      body,
+      'data.report.blacklists.engines_count'
+    )}`
+  );
+
+  return tags;
+}
+
 function handleRestError(error, entity, res, body) {
   let result;
 
@@ -148,27 +227,17 @@ function handleRestError(error, entity, res, body) {
     };
   }
 
-  if (res.statusCode === 200 && body) {
-    // we got data!
+  Logger.trace({ body, status: res.statusCode }, 'handleRestError');
+
+  if (res.statusCode === 200 && body && body.error) {
     result = {
-      entity: entity,
-      body: body
+      detail: body.error,
+      error: body
     };
-  } else if (res.statusCode === 404) {
-    //Autofocus returns a 404 if indicator is not present in the DB.
+  } else if (res.statusCode === 200 && body) {
     result = {
       entity,
-      body: null
-    };
-  } else if (res.statusCode === 400) {
-    result = {
-      error: 'Bad Request',
-      detail: body
-    };
-  } else if (res.statusCode === 429) {
-    result = {
-      error: 'Rate Limit Exceeded',
-      detail: body
+      body
     };
   } else {
     result = {
@@ -184,8 +253,7 @@ function handleRestError(error, entity, res, body) {
 function validateOption(errors, options, optionName, errMessage) {
   if (
     typeof options[optionName].value !== 'string' ||
-    (typeof options[optionName].value === 'string' &&
-      options[optionName].value.length === 0)
+    (typeof options[optionName].value === 'string' && options[optionName].value.length === 0)
   ) {
     errors.push({
       key: optionName,
@@ -198,6 +266,8 @@ function validateOptions(options, callback) {
   let errors = [];
 
   validateOption(errors, options, 'apiKey', 'You must provide a valid API Key.');
+
+  validateOption(errors, options, 'url', 'You must provide a valid APIVoid API url.');
 
   callback(null, errors);
 }
