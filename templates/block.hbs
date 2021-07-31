@@ -1,4 +1,24 @@
 {{#if details.totalResults.data.report}}
+    <h1 class="p-title">{{fa-icon icon="info-circle" fixedWidth=true}} Info</h1>
+    {{#unless (is-empty details.totalResults.data.report.risk_score.result)}}
+        <div>
+            <span class="p-key">Risk Score:</span>
+            <span class="p-value">{{details.totalResults.data.report.risk_score.result}}</span>
+        </div>
+    {{/unless}}
+    {{#unless (is-empty details.totalResults.data.report.blacklists.detections)}}
+        <div>
+            <span class="p-key">Detection Ratio</span>
+            <span class="p-value">{{details.totalResults.data.report.blacklists.detections}}/{{details.totalResults.data.report.blacklists.engines_count}}</span>
+        </div>
+    {{/unless}}
+    {{#if (gt details.anonymityTags.length 0)}}
+        <h1 class="p-title">{{fa-icon icon="user-secret" fixedWidth=true}} Anonymity</h1>
+        {{#each details.anonymityTags as |tag|}}
+            <span class="tag">{{tag}}</span>
+        {{/each}}
+    {{/if}}
+
   {{#if (eq details.totalResults.data.report.most_abused_tld true)}}
     <div>
         <span class="p-key">Domain TLD: </span>
@@ -23,33 +43,19 @@
         <span class="p-value">Top 250K</span>
     </div>
   {{/if}}
-  {{#if (eq details.totalResults.data.report.category.is_free_hosting true)}}
-    <div>
-        <span class="p-key">Free Hosting Provider: </span>
-        <span class="p-value">True</span>
-    </div>
-  {{/if}}
-  {{#if (eq details.totalResults.data.report.category.is_anonymizer true)}}
-    <div>
-        <span class="p-key">Anonymizer Service: </span>
-        <span class="p-value">True</span>
-    </div>
-  {{/if}}
-  {{#if (eq details.totalResults.data.report.category.is_url_shortener true)}}
-    <div>
-        <span class="p-key">URL Shortener Service: </span>
-        <span class="p-value">True</span>
-    </div>
-  {{/if}}
-  {{#if (eq details.totalResults.data.report.category.is_free_dynamic_dns true)}}
-    <div>
-        <span class="p-key">Free Dynamic DNS Provider: </span>
-        <span class="p-value">True</span>
-    </div>
-  {{/if}}
+
+    {{#if (gt details.categoryTags.length 0)}}
+        <h1 class="p-title">{{fa-icon icon="boxes" fixedWidth=true}} Categories</h1>
+        {{#each details.categoryTags as |tag|}}
+            <span class="tag">{{tag}}</span>
+        {{/each}}
+    {{/if}}
+
+
+
   {{#if details.totalResults.data.report.server}}
     <h1 class="p-title">
-      {{fa-icon "server" fixedWidth=true}} Server Details
+      {{fa-icon icon="server" fixedWidth=true}} Server Details
     </h1>
     {{#if details.totalResults.data.report.server.ip}}
       <div>
@@ -102,7 +108,7 @@
   {{/if}}
   {{#if details.totalResults.data.report.information}}
     <h1 class="p-title">
-      {{fa-icon "server" fixedWidth=true}} Server Details
+      {{fa-icon icon="server" fixedWidth=true}} Server Details
     </h1>
     {{#if details.totalResults.data.report.information.reverse_dns}}
       <div>
@@ -150,7 +156,7 @@
 {{/if}}
 {{#if details.detectedResults}}
   <h1 class="p-title">
-    {{fa-icon "bug" fixedWidth=true}} Blacklist Engine Details
+    {{fa-icon icon="engine-warning" fixedWidth=true}} Blacklist Engine Details
   </h1>
   {{#each details.detectedResults as |hit index|}}
     <h1 class="p-title">
@@ -176,3 +182,6 @@
     {{/if}}
   {{/each}}
 {{/if}}
+<div class="mt-2">
+    <span class="p-footnote">{{details.totalResults.credits_remained}} credits remain</span>
+</div>
