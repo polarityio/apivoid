@@ -1,6 +1,6 @@
 'use strict';
 
-const request = require('request');
+const request = require('postman-request');
 const config = require('./config/config');
 const async = require('async');
 const get = require('lodash.get');
@@ -44,6 +44,22 @@ function startup(logger) {
   requestWithDefaults = request.defaults(defaults);
 }
 
+const isLoopBackIp = (entity) => {
+  return entity.startsWith('127');
+};
+
+const isLinkLocalAddress = (entity) => {
+  return entity.startsWith('169');
+};
+
+const isPrivateIP = (entity) => {
+  return entity.isPrivateIP === true;
+};
+
+const isValidIp = (entity) => {
+  return !(isLoopBackIp(entity.value) || isLinkLocalAddress(entity.value) || isPrivateIP(entity));
+};
+
 function doLookup(entities, options, cb) {
   let lookupResults = [];
   let tasks = [];
@@ -54,7 +70,7 @@ function doLookup(entities, options, cb) {
       json: true
     };
 
-    if (entity.isIPv4) {
+    if (entity.isIPv4 && isValidIp(entity)) {
       (requestOptions.uri = `${options.url}/iprep/v1/pay-as-you-go/`),
         (requestOptions.qs = {
           key: options.apiKey,
@@ -67,6 +83,10 @@ function doLookup(entities, options, cb) {
           host: entity.value
         });
     } else {
+      lookupResults.push({
+        entity,
+        data: null
+      });
       return;
     }
 
@@ -105,15 +125,17 @@ function doLookup(entities, options, cb) {
           data: null
         });
       } else {
-        let validResults = [];
-
+        const validResults = [];
+        const unblockedEngines = [];
         Logger.trace({ result }, 'Logging lookup results');
 
         for (let i = 0; i < result.body.data.report.blacklists.engines_count; i++) {
-          const engines = result.body.data.report.blacklists.engines[i];
+          const engine = result.body.data.report.blacklists.engines[i];
 
-          if (engines.detected === true) {
-            validResults.push(engines);
+          if (engine.detected === true) {
+            validResults.push(engine);
+          } else {
+            unblockedEngines.push(engine);
           }
           Logger.trace({ valid: validResults }, 'logging blacklist stuff');
         }
@@ -134,7 +156,8 @@ function doLookup(entities, options, cb) {
                 totalResults: result.body,
                 anonymityTags,
                 categoryTags,
-                detectedResults: validResults
+                detectedResults: validResults,
+                unblockedEngines
               }
             }
           });
@@ -149,27 +172,12 @@ function doLookup(entities, options, cb) {
 
 function getCategoryTags(body) {
   const tags = [];
-
-  const isFreeHosting = get(body, 'data.report.category.is_free_hosting', false);
-  const isAnonymizer = get(body, 'data.report.category.is_anonymizer', false);
-  const isUrlShortener = get(body, 'data.report.category.is_url_shortener', false);
-  const isFreeDynamicDns = get(body, 'data.report.category.is_free_dynamic_dns', false);
-
-  if (isFreeHosting) {
-    tags.push('Free Hosting');
-  }
-  if (isAnonymizer) {
-    tags.push('Anonymizer');
-  }
-
-  if (isUrlShortener) {
-    tags.push('URL Shortener');
-  }
-
-  if (isFreeDynamicDns) {
-    tags.push('Free Dynamic DNS');
-  }
-
+  const categories = get(body, 'data.report.category', {});
+  Object.keys(categories).forEach((key) => {
+    if (categories[key]) {
+      tags.push(key.replace('is_', '').replace(/_/g, ' '));
+    }
+  });
   return tags;
 }
 

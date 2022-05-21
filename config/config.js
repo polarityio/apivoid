@@ -16,6 +16,7 @@ module.exports = {
    * @required
    */
   acronym: 'VOID',
+  onDemandOnly: true,
   /**
    * Description for this integration which is displayed in the Polarity integrations user interface
    *
@@ -88,8 +89,8 @@ module.exports = {
       description: 'Valid APIVoid API Key',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: "blocklistedOnly",

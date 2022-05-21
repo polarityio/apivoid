@@ -8,7 +8,7 @@
     {{/unless}}
     {{#unless (is-empty details.totalResults.data.report.blacklists.detections)}}
         <div>
-            <span class="p-key">Detection Ratio</span>
+            <span class="p-key">Detection Ratio: </span>
             <span class="p-value">{{details.totalResults.data.report.blacklists.detections}}/{{details.totalResults.data.report.blacklists.engines_count}}</span>
         </div>
     {{/unless}}
@@ -51,8 +51,7 @@
         {{/each}}
     {{/if}}
 
-
-
+  {{!-- This is for domain results --}}
   {{#if details.totalResults.data.report.server}}
     <h1 class="p-title">
       {{fa-icon icon="server" fixedWidth=true}} Server Details
@@ -93,19 +92,21 @@
           <span class="p-value">{{details.totalResults.data.report.server.city_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.latitude}}
-      <div>
-          <span class="p-key">Lat/Long: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.latitude}} / {{details.totalResults.data.report.server.longitude}}</span>
-      </div>
-    {{/if}}
     {{#if details.totalResults.data.report.server.isp}}
       <div>
           <span class="p-key">ISP: </span>
           <span class="p-value">{{details.totalResults.data.report.server.isp}}</span>
       </div>
     {{/if}}
+    {{#if details.totalResults.data.report.server.asn}}
+      <div>
+        <span class="p-key">ASN: </span>
+        <span class="p-value">{{details.totalResults.data.report.server.asn}}</span>
+      </div>
+    {{/if}}
   {{/if}}
+
+  {{!-- This is for IP results --}}
   {{#if details.totalResults.data.report.information}}
     <h1 class="p-title">
       {{fa-icon icon="server" fixedWidth=true}} Server Details
@@ -140,47 +141,75 @@
           <span class="p-value">{{details.totalResults.data.report.information.city_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.latitude}}
-      <div>
-          <span class="p-key">Lat/Long: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.latitude}} / {{details.totalResults.data.report.information.longitude}}</span>
-      </div>
-    {{/if}}
     {{#if details.totalResults.data.report.information.isp}}
       <div>
           <span class="p-key">ISP: </span>
           <span class="p-value">{{details.totalResults.data.report.information.isp}}</span>
       </div>
     {{/if}}
+    {{#if details.totalResults.data.report.information.isp}}
+      <div>
+        <span class="p-key">ASN: </span>
+        <span class="p-value">{{details.totalResults.data.report.information.asn}}</span>
+      </div>
+    {{/if}}
   {{/if}}
 {{/if}}
-{{#if details.detectedResults}}
-  <h1 class="p-title">
-    {{fa-icon icon="engine-warning" fixedWidth=true}} Blacklist Engine Details
-  </h1>
-  {{#each details.detectedResults as |hit index|}}
-    <h1 class="p-title">
-      Engine #{{inc index}}
-    </h1>
-    {{#if hit.engine}}
-      <div>
-          <span class="p-key">Name: </span>
-          <span class="p-value">{{hit.engine}}</span>
-      </div>
-    {{/if}}
-    {{#if hit.confidence}}
-      <div>
-          <span class="p-key">Confidence: </span>
-          <span class="p-value">{{hit.confidence}}</span>
-      </div>
-    {{/if}}
-    {{#if hit.reference}}
-      <div>
-          <span class="p-key">Reference: </span>
-          <span class="p-value">{{hit.reference}}</span>
-      </div>
-    {{/if}}
-  {{/each}}
+
+
+<h1 class="p-title">
+  {{fa-icon icon="engine-warning" fixedWidth=true}} Blocklist Detections
+</h1>
+{{#if (eq details.detectedResults.length 0)}}
+  <span>The {{block.entity.type}} {{block.entity.value}} was not present in any blocklists.</span>
+{{else}}
+  <span>The {{block.entity.type}} {{block.entity.value}} was present in {{details.totalResults.data.report.blacklists.detections}} different blocklists.</span>
+  <div class="scrollable-container mt-1">
+    <table>
+        <tbody>
+          <tr>
+            <td colspan="2" class="table-header">
+              Positive Blocklist Detections
+            </td>
+          </tr>
+          {{#each details.detectedResults as |hit index|}}
+            <tr>
+              <td style="color: #FF3A59">
+                {{fa-icon icon="do-not-enter" class="icon" fixedWidth=true}}
+              </td>
+              <td class="engine">
+                <div>
+                  {{hit.engine}}
+                </div>
+                <div class="p-footnote">
+                  {{hit.reference}}
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+          <tr>
+            <td colspan="2" class="table-header">
+              No Detections
+            </td>
+          </tr>
+          {{#each details.unblockedEngines as |hit index|}}
+            <tr>
+              <td style="color: #ccc">
+                {{fa-icon icon="circle" class="icon" fixedWidth=true}}
+              </td>
+              <td class="engine">
+                <div>
+                  {{hit.engine}}
+                </div>
+                <div class="p-footnote">
+                  {{hit.reference}}
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+  </div>
 {{/if}}
 <div class="mt-2">
     <span class="p-footnote">{{details.totalResults.credits_remained}} credits remain</span>

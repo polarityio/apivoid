@@ -1,3 +1,5 @@
+@border-color: #dee2e6;
+
 .tag {
   border-radius: 4px;
   padding: 2px 5px;
@@ -5,4 +7,26 @@
   line-height: 2em;
   white-space: nowrap;
   background-color: #eee;
+}
+
+.scrollable-container{
+  max-height: 200px;
+  overflow-y: auto;
+  line-height: normal;
+  border: 1px solid @border-color;
+}
+
+table {
+  .engine{
+    width: 100%;
+    line-height: 1.2em;
+  }
+
+  .icon{
+    font-size: 10px;
+  }
+
+  .table-header{
+    background-color: #ddd;
+  }
 }
