@@ -24,7 +24,7 @@ module.exports = {
    * @optional
    */
   description:
-    'APIVoid provides JSON APIs useful for cyber threat analysis, threat detection and threat prevention.',
+    'Provides information on whether a domain or IP is present in any of the block lists tracked by the APIVoid IP and Domain reputation services.',
   entityTypes: ['ipv4', 'domain'],
   styles: ['./styles/style.less'],
   /**
