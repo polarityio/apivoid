@@ -163,7 +163,14 @@
 {{#if (eq details.detectedResults.length 0)}}
   <span>The {{block.entity.type}} {{block.entity.value}} was not present in any blocklists.</span>
 {{else}}
-  <span>The {{block.entity.type}} {{block.entity.value}} was present in {{details.totalResults.data.report.blacklists.detections}} different blocklists.</span>
+  <span>The {{block.entity.type}} {{block.entity.value}} was present in
+    {{details.totalResults.data.report.blacklists.detections}}
+    {{#if (eq details.totalResults.data.report.blacklists.detections.length 1)}}
+      1 blocklist.
+    {{else}}
+      different blocklists.
+    {{/if}}
+  </span>
   <div class="scrollable-container mt-1">
     <table>
         <tbody>
