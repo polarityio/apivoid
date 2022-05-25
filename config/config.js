@@ -16,6 +16,7 @@ module.exports = {
    * @required
    */
   acronym: 'VOID',
+  onDemandOnly: true,
   /**
    * Description for this integration which is displayed in the Polarity integrations user interface
    *
@@ -23,7 +24,7 @@ module.exports = {
    * @optional
    */
   description:
-    'APIVoid provides JSON APIs useful for cyber threat analysis, threat detection and threat prevention.',
+    'Provides information on whether a domain or IP is present in any of the block lists tracked by the APIVoid IP and Domain reputation services.',
   entityTypes: ['ipv4', 'domain'],
   styles: ['./styles/style.less'],
   /**
@@ -88,8 +89,8 @@ module.exports = {
       description: 'Valid APIVoid API Key',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: "blocklistedOnly",

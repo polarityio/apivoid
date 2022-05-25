@@ -1,12 +1,14 @@
 # Polarity APIVoid Integration
 
-Polarity's APIVoid integration retrieves reputation information from various APIVoid endpoints.
+Polarity's APIVoid integration retrieves reputation information for IP addresses and domains.  The integration will report if the indicator in question is present in any of the block lists tracked by the APIVoid IP and Domain reputation services.
 
 Please see [APIVoid](https://www.apivoid.com/) for more information.
 
 Check out the integration below: 
 
-![image](https://user-images.githubusercontent.com/22529325/125318061-8163a700-e307-11eb-91b8-85180dd0eefc.png)
+| ![image](assets/overlay-domain.png) |![](assets/overlay-ip.png)
+|---|---|
+|*Domain Example* |*IP Example*|
 
 ## APIVoid Integration Options
 
