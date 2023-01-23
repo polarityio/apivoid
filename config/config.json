@@ -1,0 +1,62 @@
+{
+  "name": "APIVoid",
+  "acronym": "VOID",
+  "onDemandOnly": true,
+  "description": "Provides information on whether a domain or IP is present in any of the block lists tracked by the APIVoid IP and Domain reputation services.",
+  "entityTypes": [
+    "IPv4",
+    "domain"
+  ],
+  "styles": [
+    "./styles/style.less"
+  ],
+  "block": {
+    "component": {
+      "file": "./components/block.js"
+    },
+    "template": {
+      "file": "./templates/block.hbs"
+    }
+  },
+  "defaultColor": "light-gray",
+  "request": {
+    "cert": "",
+    "key": "",
+    "passphrase": "",
+    "ca": "",
+    "proxy": "",
+    "rejectUnauthorized": true
+  },
+  "logging": {
+    "level": "info"
+  },
+  "options": [
+    {
+      "key": "url",
+      "name": "APIVoid URL",
+      "description": "The base URL for the APIVoid API including the schema.",
+      "type": "text",
+      "default": "https://endpoint.apivoid.com",
+      "userCanEdit": false,
+      "adminOnly": true
+    },
+    {
+      "key": "apiKey",
+      "name": "Valid APIVoid API Key",
+      "description": "Valid APIVoid API Key",
+      "default": "",
+      "type": "password",
+      "userCanEdit": false,
+      "adminOnly": true
+    },
+    {
+      "key": "blocklistedOnly",
+      "name": "View Blocklisted Indicators Only",
+      "description": "If checked, only indicators with at least 1 blocklist engine detection will be returned to the Polarity Overlay.",
+      "default": true,
+      "type": "boolean",
+      "userCanEdit": true,
+      "adminOnly": false
+    }
+  ]
+}
