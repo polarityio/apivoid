@@ -32,15 +32,6 @@
   },
   "options": [
     {
-      "key": "url",
-      "name": "APIVoid URL",
-      "description": "The base URL for the APIVoid API including the schema.",
-      "type": "text",
-      "default": "https://endpoint.apivoid.com",
-      "userCanEdit": false,
-      "adminOnly": true
-    },
-    {
       "key": "apiKey",
       "name": "Valid APIVoid API Key",
       "description": "Valid APIVoid API Key",
