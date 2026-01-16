@@ -8,6 +8,7 @@ let Logger;
 let requestWithDefaults;
 
 const MAX_PARALLEL_LOOKUPS = 10;
+const API_URL = 'https://api.apivoid.com/v2';
 
 function startup(logger) {
   let defaults = { json: true };
@@ -38,22 +39,24 @@ function doLookup(entities, options, cb) {
 
   entities.forEach((entity) => {
     let requestOptions = {
-      method: 'GET',
+      headers: {
+        'X-API-Key': options.apiKey,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
       json: true
     };
 
     if (entity.isIPv4 && isValidIp(entity)) {
-      (requestOptions.uri = `${options.url}/iprep/v1/pay-as-you-go/`),
-        (requestOptions.qs = {
-          key: options.apiKey,
+      requestOptions.uri = `${API_URL}/ip-reputation`;
+      requestOptions.body = {
         ip: entity.value
-        });
+      };
     } else if (entity.isDomain) {
-      (requestOptions.uri = `${options.url}/domainbl/v1/pay-as-you-go/`),
-        (requestOptions.qs = {
-          key: options.apiKey,
+      requestOptions.uri = `${API_URL}/domain-reputation`;
+      requestOptions.body = {
         host: entity.value
-        });
+      };
     } else {
       lookupResults.push({
         entity,
@@ -86,12 +89,7 @@ function doLookup(entities, options, cb) {
     }
 
     results.forEach((result) => {
-      if (
-        !result.body ||
-        result.body === null ||
-        !result.body.success ||
-        result.body.success != true
-      ) {
+      if (!result.body) {
         lookupResults.push({
           entity: result.entity,
           data: null
@@ -101,10 +99,10 @@ function doLookup(entities, options, cb) {
         const unblockedEngines = [];
         Logger.trace({ result }, 'Logging lookup results');
 
-        for (let i = 0; i < result.body.data.report.blacklists.engines_count; i++) {
-          const engine = result.body.data.report.blacklists.engines[i];
+        for (let i = 0; i < result.body.blacklists?.engines_count; i++) {
+          const engine = result.body.blacklists?.engines[i];
 
-          if (engine.detected === true) {
+          if (engine?.detected === true) {
             validResults.push(engine);
           } else {
             unblockedEngines.push(engine);
@@ -144,7 +142,7 @@ function doLookup(entities, options, cb) {
 
 function getCategoryTags(body) {
   const tags = [];
-  const categories = get(body, 'data.report.category', {});
+  const categories = get(body, 'category', {});
   Object.keys(categories).forEach((key) => {
     if (categories[key]) {
       tags.push(key.replace('is_', '').replace(/_/g, ' '));
@@ -156,11 +154,11 @@ function getCategoryTags(body) {
 function getAnonymityTags(body) {
   const tags = [];
 
-  const isProxy = get(body, 'data.report.anonymity.is_proxy', false);
-  const isWebProxy = get(body, 'data.report.anonymity.is_webproxy', false);
-  const isVPN = get(body, 'data.report.anonymity.is_vpn', false);
-  const isHosting = get(body, 'data.report.anonymity.is_hosting', false);
-  const isTor = get(body, 'data.report.anonymity.is_tor', false);
+  const isProxy = get(body, 'anonymity.is_proxy', false);
+  const isWebProxy = get(body, 'anonymity.is_webproxy', false);
+  const isVPN = get(body, 'anonymity.is_vpn', false);
+  const isHosting = get(body, 'anonymity.is_hosting', false);
+  const isTor = get(body, 'anonymity.is_tor', false);
 
   if (isProxy) {
     tags.push('Proxy');
@@ -186,11 +184,11 @@ function getAnonymityTags(body) {
 
 function getSummaryTags(body) {
   const tags = [];
-  tags.push(`Risk Score: ${get(body, 'data.report.risk_score.result', 'Not Available')}`);
+  tags.push(`Risk Score: ${get(body, 'risk_score.result', 'Not Available')}`);
   tags.push(
-    `Detection Ratio: ${get(body, 'data.report.blacklists.detections')} / ${get(
+    `Detection Ratio: ${get(body, 'blacklists.detections')} / ${get(
       body,
-      'data.report.blacklists.engines_count'
+      'blacklists.engines_count'
     )}`
   );
 
