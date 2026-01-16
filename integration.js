@@ -1,10 +1,8 @@
 'use strict';
 
 const request = require('postman-request');
-const config = require('./config/config');
 const async = require('async');
 const get = require('lodash.get');
-const fs = require('fs');
 
 let Logger;
 let requestWithDefaults;
@@ -12,34 +10,8 @@ let requestWithDefaults;
 const MAX_PARALLEL_LOOKUPS = 10;
 
 function startup(logger) {
-  let defaults = {};
+  let defaults = { json: true };
   Logger = logger;
-
-  const { cert, key, passphrase, ca, proxy, rejectUnauthorized } = config.request;
-
-  if (typeof cert === 'string' && cert.length > 0) {
-    defaults.cert = fs.readFileSync(cert);
-  }
-
-  if (typeof key === 'string' && key.length > 0) {
-    defaults.key = fs.readFileSync(key);
-  }
-
-  if (typeof passphrase === 'string' && passphrase.length > 0) {
-    defaults.passphrase = passphrase;
-  }
-
-  if (typeof ca === 'string' && ca.length > 0) {
-    defaults.ca = fs.readFileSync(ca);
-  }
-
-  if (typeof proxy === 'string' && proxy.length > 0) {
-    defaults.proxy = proxy;
-  }
-
-  if (typeof rejectUnauthorized === 'boolean') {
-    defaults.rejectUnauthorized = rejectUnauthorized;
-  }
 
   requestWithDefaults = request.defaults(defaults);
 }
@@ -74,13 +46,13 @@ function doLookup(entities, options, cb) {
       (requestOptions.uri = `${options.url}/iprep/v1/pay-as-you-go/`),
         (requestOptions.qs = {
           key: options.apiKey,
-          ip: entity.value
+        ip: entity.value
         });
     } else if (entity.isDomain) {
       (requestOptions.uri = `${options.url}/domainbl/v1/pay-as-you-go/`),
         (requestOptions.qs = {
           key: options.apiKey,
-          host: entity.value
+        host: entity.value
         });
     } else {
       lookupResults.push({
