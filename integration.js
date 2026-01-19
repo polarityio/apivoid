@@ -95,12 +95,13 @@ function doLookup(entities, options, cb) {
           data: null
         });
       } else {
+        const enginesCount = get(result, 'body.blacklists.engines_count', 0);
         const validResults = [];
         const unblockedEngines = [];
         Logger.trace({ result }, 'Logging lookup results');
 
-        for (let i = 0; i < result.body.blacklists?.engines_count; i++) {
-          const engine = result.body.blacklists?.engines[i];
+        for (let i = 0; i < enginesCount; i++) {
+          const engine = result.body.blacklists.engines[i];
 
           if (engine?.detected === true) {
             validResults.push(engine);
