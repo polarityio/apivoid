@@ -1,156 +1,163 @@
-{{#if details.totalResults.data.report}}
-    <h1 class="p-title">{{fa-icon icon="info-circle" fixedWidth=true}} Info</h1>
-    {{#unless (is-empty details.totalResults.data.report.risk_score.result)}}
+{{#if details.totalResults}}
+    <h1 class="p-title">Info</h1>
+    {{#unless (is-empty details.totalResults.risk_score.result)}}
         <div>
             <span class="p-key">Risk Score:</span>
-            <span class="p-value">{{details.totalResults.data.report.risk_score.result}}</span>
+            <span class="p-value">{{details.totalResults.risk_score.result}}</span>
         </div>
     {{/unless}}
-    {{#unless (is-empty details.totalResults.data.report.blacklists.detections)}}
+    {{#unless (is-empty details.totalResults.blacklists.detections)}}
         <div>
             <span class="p-key">Detection Ratio: </span>
-            <span class="p-value">{{details.totalResults.data.report.blacklists.detections}}/{{details.totalResults.data.report.blacklists.engines_count}}</span>
+            <span class="p-value">{{details.totalResults.blacklists.detections}}/{{details.totalResults.blacklists.engines_count}}</span>
         </div>
     {{/unless}}
     {{#if (gt details.anonymityTags.length 0)}}
-        <h1 class="p-title">{{fa-icon icon="user-secret" fixedWidth=true}} Anonymity</h1>
+        <h1 class="p-title">Anonymity</h1>
         {{#each details.anonymityTags as |tag|}}
             <span class="tag">{{tag}}</span>
         {{/each}}
     {{/if}}
 
-  {{#if (eq details.totalResults.data.report.most_abused_tld true)}}
+  {{#if (eq details.totalResults.most_abused_tld true)}}
     <div>
         <span class="p-key">Domain TLD: </span>
         <span class="p-value" style="color:red"><b>RISKY</b></span>
     </div>
   {{/if}}
-  {{#if (eq details.totalResults.data.report.alexa_top_10k true)}}
+  {{#if (eq details.totalResults.alexa_top_10k true)}}
     <div>
         <span class="p-key">Alexa Rank: </span>
         <span class="p-value">Top 10K</span>
     </div>
   {{/if}}
-  {{#if (eq details.totalResults.data.report.alexa_top_100k true)}}
+  {{#if (eq details.totalResults.alexa_top_100k true)}}
     <div>
         <span class="p-key">Alexa Rank: </span>
         <span class="p-value">Top 100K</span>
     </div>
   {{/if}}
-  {{#if (eq details.totalResults.data.report.alexa_top_250k true)}}
+  {{#if (eq details.totalResults.alexa_top_250k true)}}
     <div>
         <span class="p-key">Alexa Rank: </span>
         <span class="p-value">Top 250K</span>
     </div>
   {{/if}}
 
-    {{#if (gt details.categoryTags.length 0)}}
-        <h1 class="p-title">{{fa-icon icon="boxes" fixedWidth=true}} Categories</h1>
-        {{#each details.categoryTags as |tag|}}
-            <span class="tag">{{tag}}</span>
-        {{/each}}
-    {{/if}}
+  {{#if (gt details.securityCheckTags.length 0)}}
+    <h1 class="p-title">Security Checks</h1>
+    {{#each details.securityCheckTags as |tag|}}
+      <span class="tag">{{tag}}</span>
+    {{/each}}
+  {{/if}}
+
+  {{#if (gt details.categoryTags.length 0)}}
+      <h1 class="p-title">Categories</h1>
+      {{#each details.categoryTags as |tag|}}
+          <span class="tag">{{tag}}</span>
+      {{/each}}
+  {{/if}}
 
   {{!-- This is for domain results --}}
-  {{#if details.totalResults.data.report.server}}
+  {{#if details.totalResults.server_details}}
     <h1 class="p-title">
-      {{fa-icon icon="server" fixedWidth=true}} Server Details
+      Server Details
     </h1>
-    {{#if details.totalResults.data.report.server.ip}}
+    {{#if details.totalResults.server_details.ip}}
       <div>
           <span class="p-key">Server IP: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.ip}}</span>
+          <span class="p-value">{{details.totalResults.server_details.ip}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.reverse_dns}}
+    {{#if details.totalResults.server_details.reverse_dns}}
       <div>
           <span class="p-key">Reverse DNS: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.reverse_dns}}</span>
+          <span class="p-value">{{details.totalResults.server_details.reverse_dns}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.continent_name}}
+    {{#if details.totalResults.server_details.continent_name}}
       <div>
           <span class="p-key">Continent: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.continent_name}}</span>
+          <span class="p-value">{{details.totalResults.server_details.continent_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.country_name}}
+    {{#if details.totalResults.server_details.country_name}}
       <div>
           <span class="p-key">Country: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.country_name}}</span>
+          <span class="p-value">{{details.totalResults.server_details.country_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.region_name}}
+    {{#if details.totalResults.server_details.region_name}}
       <div>
           <span class="p-key">Region: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.region_name}}</span>
+          <span class="p-value">{{details.totalResults.server_details.region_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.city_name}}
+    {{#if details.totalResults.server_details.city_name}}
       <div>
           <span class="p-key">City: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.city_name}}</span>
+          <span class="p-value">{{details.totalResults.server_details.city_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.isp}}
+    {{#if details.totalResults.server_details.isp}}
       <div>
           <span class="p-key">ISP: </span>
-          <span class="p-value">{{details.totalResults.data.report.server.isp}}</span>
+          <span class="p-value">{{details.totalResults.server_details.isp}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.server.asn}}
+    {{#if details.totalResults.server_details.asn}}
       <div>
         <span class="p-key">ASN: </span>
-        <span class="p-value">{{details.totalResults.data.report.server.asn}}</span>
+        <span class="p-value">{{details.totalResults.server_details.asn}}</span>
       </div>
     {{/if}}
   {{/if}}
 
   {{!-- This is for IP results --}}
-  {{#if details.totalResults.data.report.information}}
+  {{#if details.totalResults.information}}
     <h1 class="p-title">
-      {{fa-icon icon="server" fixedWidth=true}} Server Details
+      Server Details
     </h1>
-    {{#if details.totalResults.data.report.information.reverse_dns}}
+    {{#if details.totalResults.information.reverse_dns}}
       <div>
           <span class="p-key">Reverse DNS: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.reverse_dns}}</span>
+          <span class="p-value">{{details.totalResults.information.reverse_dns}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.continent_name}}
+    {{#if details.totalResults.information.continent_name}}
       <div>
           <span class="p-key">Continent: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.continent_name}}</span>
+          <span class="p-value">{{details.totalResults.information.continent_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.country_name}}
+    {{#if details.totalResults.information.country_name}}
       <div>
           <span class="p-key">Country: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.country_name}}</span>
+          <span class="p-value">{{details.totalResults.information.country_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.region_name}}
+    {{#if details.totalResults.information.region_name}}
       <div>
           <span class="p-key">Region: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.region_name}}</span>
+          <span class="p-value">{{details.totalResults.information.region_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.city_name}}
+    {{#if details.totalResults.information.city_name}}
       <div>
           <span class="p-key">City: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.city_name}}</span>
+          <span class="p-value">{{details.totalResults.information.city_name}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.isp}}
+    {{#if details.totalResults.information.isp}}
       <div>
           <span class="p-key">ISP: </span>
-          <span class="p-value">{{details.totalResults.data.report.information.isp}}</span>
+          <span class="p-value">{{details.totalResults.information.isp}}</span>
       </div>
     {{/if}}
-    {{#if details.totalResults.data.report.information.isp}}
+    {{#if details.totalResults.information.isp}}
       <div>
         <span class="p-key">ASN: </span>
-        <span class="p-value">{{details.totalResults.data.report.information.asn}}</span>
+        <span class="p-value">{{details.totalResults.information.asn}}</span>
       </div>
     {{/if}}
   {{/if}}
@@ -158,15 +165,15 @@
 
 
 <h1 class="p-title">
-  {{fa-icon icon="engine-warning" fixedWidth=true}} Blocklist Detections
+  Blocklist Detections
 </h1>
 {{#if (eq details.detectedResults.length 0)}}
   <span>The {{block.entity.type}} {{block.entity.value}} was not present in any blocklists.</span>
 {{else}}
   <span>The {{block.entity.type}} {{block.entity.value}} was present in
-    {{details.totalResults.data.report.blacklists.detections}}
-    {{#if (eq details.totalResults.data.report.blacklists.detections.length 1)}}
-      1 blocklist.
+    {{details.totalResults.blacklists.detections}}
+    {{#if (eq details.totalResults.blacklists.detections 1)}}
+      blocklist.
     {{else}}
       different blocklists.
     {{/if}}
@@ -186,7 +193,7 @@
               </td>
               <td class="engine">
                 <div>
-                  {{hit.engine}}
+                  {{hit.name}}
                 </div>
                 <div class="p-footnote">
                   {{hit.reference}}
@@ -206,7 +213,7 @@
               </td>
               <td class="engine">
                 <div>
-                  {{hit.engine}}
+                  {{hit.name}}
                 </div>
                 <div class="p-footnote">
                   {{hit.reference}}
@@ -219,5 +226,5 @@
   </div>
 {{/if}}
 <div class="mt-2">
-    <span class="p-footnote">{{details.totalResults.credits_remained}} credits remain</span>
+    <span class="p-footnote">{{details.apiQuota.available}} credits remain</span>
 </div>
