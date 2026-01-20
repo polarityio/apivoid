@@ -172,8 +172,8 @@
 {{else}}
   <span>The {{block.entity.type}} {{block.entity.value}} was present in
     {{details.totalResults.blacklists.detections}}
-    {{#if (eq details.totalResults.blacklists.detections.length 1)}}
-      1 blocklist.
+    {{#if (eq details.totalResults.blacklists.detections 1)}}
+      blocklist.
     {{else}}
       different blocklists.
     {{/if}}
