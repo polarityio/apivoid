@@ -9,6 +9,7 @@ let requestWithDefaults;
 
 const MAX_PARALLEL_LOOKUPS = 10;
 const API_URL = 'https://api.apivoid.com/v2';
+const QUOTA_HEADER = 'x-service-quota';
 
 function startup(logger) {
   let defaults = { json: true };
@@ -257,14 +258,14 @@ function getSummaryTags(body) {
 
 function getApiQuota(res) {
   const quota = {};
-  
+
   // Check if response and headers exist
-  if (!res || !res.headers || !res.headers['x-service-quota']) {
+  if (!res || !res.headers || !res.headers[QUOTA_HEADER]) {
     return quota;
   }
 
-  const quotaHeader = res.headers['x-service-quota'];
-  
+  const quotaHeader = res.headers[QUOTA_HEADER];
+
   // Check if header is a valid string
   if (typeof quotaHeader !== 'string' || quotaHeader.trim() === '') {
     return quota;
@@ -272,7 +273,7 @@ function getApiQuota(res) {
 
   // Split by semicolon and parse each key-value pair
   const pairs = quotaHeader.split(';');
-  
+
   pairs.forEach((pair) => {
     const trimmedPair = pair.trim();
     if (!trimmedPair) {
