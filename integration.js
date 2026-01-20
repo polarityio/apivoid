@@ -298,8 +298,8 @@ function getApiQuota(res) {
       quota[key] = true;
     } else if (value === 'false') {
       quota[key] = false;
-    } else if (!isNaN(value) && value !== '') {
-      // Check if value is a number
+    } else if (value.length > 0 && !isNaN(Number(value))) {
+      // Check if value is a number - ensure it has length and properly converts
       quota[key] = Number(value);
     } else {
       // Keep as string
