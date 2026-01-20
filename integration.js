@@ -69,6 +69,8 @@ function doLookup(entities, options, cb) {
 
     tasks.push(function (done) {
       requestWithDefaults(requestOptions, function (error, res, body) {
+        Logger.trace({ headers: res && res.headers ? res.headers : 'None' }, 'Response');
+
         let processedResult = handleRestError(error, entity, res, body);
 
         if (processedResult.error) {
@@ -98,6 +100,7 @@ function doLookup(entities, options, cb) {
         const enginesCount = get(result, 'body.blacklists.engines_count', 0);
         const validResults = [];
         const unblockedEngines = [];
+
         Logger.trace({ result }, 'Logging lookup results');
 
         for (let i = 0; i < enginesCount; i++) {
@@ -108,7 +111,6 @@ function doLookup(entities, options, cb) {
           } else {
             unblockedEngines.push(engine);
           }
-          Logger.trace({ valid: validResults }, 'logging blacklist stuff');
         }
 
         if (options.blocklistedOnly === true && validResults.length === 0) {
@@ -127,8 +129,10 @@ function doLookup(entities, options, cb) {
                 totalResults: result.body,
                 anonymityTags,
                 categoryTags,
+                securityCheckTags: getSecurityCheckTags(result.body),
                 detectedResults: validResults,
-                unblockedEngines
+                unblockedEngines,
+                apiQuota: getApiQuota(result.response)
               }
             }
           });
@@ -183,6 +187,61 @@ function getAnonymityTags(body) {
   return tags;
 }
 
+function getSecurityCheckTags(body) {
+  const tags = [];
+
+  const isMostAbusedTld = get(body, 'security_checks.is_most_abused_tld', false);
+  const isDomainBlacklisted = get(body, 'security_checks.is_domain_blacklisted', false);
+  const isUncommonHostLength = get(body, 'security_checks.is_uncommon_host_length', false);
+  const isUncommonDashCharCount = get(body, 'security_checks.is_uncommon_dash_char_count', false);
+  const isUncommonDotCharCount = get(body, 'security_checks.is_uncommon_dot_char_count', false);
+  const isSuspiciousHomoglyph = get(body, 'security_checks.is_suspicious_homoglyph', false);
+  const isPossibleTyposquatting = get(body, 'security_checks.is_possible_typosquatting', false);
+  const isUncommonClickableDomain = get(
+    body,
+    'security_checks.is_uncommon_clickable_domain',
+    false
+  );
+  const isRiskyCategory = get(body, 'security_checks.is_risky_category', false);
+
+  if (isMostAbusedTld) {
+    tags.push('Most Abused TLD');
+  }
+  if (isDomainBlacklisted) {
+    tags.push('Domain Blacklisted');
+  }
+
+  if (isUncommonHostLength) {
+    tags.push('Uncommon Host Length');
+  }
+
+  if (isUncommonDashCharCount) {
+    tags.push('Uncommon Dash Count');
+  }
+
+  if (isUncommonDotCharCount) {
+    tags.push('Uncommon Dot Count');
+  }
+
+  if (isSuspiciousHomoglyph) {
+    tags.push('Suspicious Homoglyph');
+  }
+
+  if (isPossibleTyposquatting) {
+    tags.push('Possible Typosquatting');
+  }
+
+  if (isUncommonClickableDomain) {
+    tags.push('Uncommon Clickable Domain');
+  }
+
+  if (isRiskyCategory) {
+    tags.push('Risky Category');
+  }
+
+  return tags;
+}
+
 function getSummaryTags(body) {
   const tags = [];
   tags.push(`Risk Score: ${get(body, 'risk_score.result', 'Not Available')}`);
@@ -194,6 +253,60 @@ function getSummaryTags(body) {
   );
 
   return tags;
+}
+
+function getApiQuota(res) {
+  const quota = {};
+  
+  // Check if response and headers exist
+  if (!res || !res.headers || !res.headers['x-service-quota']) {
+    return quota;
+  }
+
+  const quotaHeader = res.headers['x-service-quota'];
+  
+  // Check if header is a valid string
+  if (typeof quotaHeader !== 'string' || quotaHeader.trim() === '') {
+    return quota;
+  }
+
+  // Split by semicolon and parse each key-value pair
+  const pairs = quotaHeader.split(';');
+  
+  pairs.forEach((pair) => {
+    const trimmedPair = pair.trim();
+    if (!trimmedPair) {
+      return; // Skip empty pairs
+    }
+
+    const equalIndex = trimmedPair.indexOf('=');
+    if (equalIndex === -1) {
+      return; // Skip malformed pairs without '='
+    }
+
+    const key = trimmedPair.substring(0, equalIndex).trim();
+    const value = trimmedPair.substring(equalIndex + 1).trim();
+
+    if (!key) {
+      return; // Skip if key is empty
+    }
+
+    // Convert value to appropriate type
+    // Check for boolean values
+    if (value === 'true') {
+      quota[key] = true;
+    } else if (value === 'false') {
+      quota[key] = false;
+    } else if (!isNaN(value) && value !== '') {
+      // Check if value is a number
+      quota[key] = Number(value);
+    } else {
+      // Keep as string
+      quota[key] = value;
+    }
+  });
+
+  return quota;
 }
 
 function handleRestError(error, entity, res, body) {
@@ -216,7 +329,8 @@ function handleRestError(error, entity, res, body) {
   } else if (res.statusCode === 200 && body) {
     result = {
       entity,
-      body
+      body,
+      response: res
     };
   } else {
     result = {
@@ -245,8 +359,6 @@ function validateOptions(options, callback) {
   let errors = [];
 
   validateOption(errors, options, 'apiKey', 'You must provide a valid API Key.');
-
-  validateOption(errors, options, 'url', 'You must provide a valid APIVoid API url.');
 
   callback(null, errors);
 }
