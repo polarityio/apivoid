@@ -2,7 +2,7 @@
 
 const request = require('postman-request');
 const async = require('async');
-const get = require('lodash.get');
+const _ = require('lodash');
 
 let Logger;
 let requestWithDefaults;
@@ -98,7 +98,7 @@ function doLookup(entities, options, cb) {
           data: null
         });
       } else {
-        const enginesCount = get(result, 'body.blacklists.engines_count', 0);
+        const enginesCount = _.get(result, 'body.blacklists.engines_count', 0);
         const validResults = [];
         const unblockedEngines = [];
 
@@ -148,7 +148,7 @@ function doLookup(entities, options, cb) {
 
 function getCategoryTags(body) {
   const tags = [];
-  const categories = get(body, 'category', {});
+  const categories = _.get(body, 'category', {});
   Object.keys(categories).forEach((key) => {
     if (categories[key]) {
       tags.push(key.replace('is_', '').replace(/_/g, ' '));
@@ -160,12 +160,11 @@ function getCategoryTags(body) {
 function getAnonymityTags(body) {
   const tags = [];
 
-  const isProxy = get(body, 'anonymity.is_proxy', false);
-  const isWebProxy = get(body, 'anonymity.is_webproxy', false);
-  const isVPN = get(body, 'anonymity.is_vpn', false);
-  const isHosting = get(body, 'anonymity.is_hosting', false);
-  const isTor = get(body, 'anonymity.is_tor', false);
-
+  const isProxy = _.get(body, 'anonymity.is_proxy', false);
+  const isWebProxy = _.get(body, 'anonymity.is_webproxy', false);
+  const isVPN = _.get(body, 'anonymity.is_vpn', false);
+  const isHosting = _.get(body, 'anonymity.is_hosting', false);
+  const isTor = _.get(body, 'anonymity.is_tor', false);
   if (isProxy) {
     tags.push('Proxy');
   }
@@ -191,19 +190,19 @@ function getAnonymityTags(body) {
 function getSecurityCheckTags(body) {
   const tags = [];
 
-  const isMostAbusedTld = get(body, 'security_checks.is_most_abused_tld', false);
-  const isDomainBlacklisted = get(body, 'security_checks.is_domain_blacklisted', false);
-  const isUncommonHostLength = get(body, 'security_checks.is_uncommon_host_length', false);
-  const isUncommonDashCharCount = get(body, 'security_checks.is_uncommon_dash_char_count', false);
-  const isUncommonDotCharCount = get(body, 'security_checks.is_uncommon_dot_char_count', false);
-  const isSuspiciousHomoglyph = get(body, 'security_checks.is_suspicious_homoglyph', false);
-  const isPossibleTyposquatting = get(body, 'security_checks.is_possible_typosquatting', false);
-  const isUncommonClickableDomain = get(
+  const isMostAbusedTld = _.get(body, 'security_checks.is_most_abused_tld', false);
+  const isDomainBlacklisted = _.get(body, 'security_checks.is_domain_blacklisted', false);
+  const isUncommonHostLength = _.get(body, 'security_checks.is_uncommon_host_length', false);
+  const isUncommonDashCharCount = _.get(body, 'security_checks.is_uncommon_dash_char_count', false);
+  const isUncommonDotCharCount = _.get(body, 'security_checks.is_uncommon_dot_char_count', false);
+  const isSuspiciousHomoglyph = _.get(body, 'security_checks.is_suspicious_homoglyph', false);
+  const isPossibleTyposquatting = _.get(body, 'security_checks.is_possible_typosquatting', false);
+  const isUncommonClickableDomain = _.get(
     body,
     'security_checks.is_uncommon_clickable_domain',
     false
   );
-  const isRiskyCategory = get(body, 'security_checks.is_risky_category', false);
+  const isRiskyCategory = _.get(body, 'security_checks.is_risky_category', false);
 
   if (isMostAbusedTld) {
     tags.push('Most Abused TLD');
@@ -245,9 +244,9 @@ function getSecurityCheckTags(body) {
 
 function getSummaryTags(body) {
   const tags = [];
-  tags.push(`Risk Score: ${get(body, 'risk_score.result', 'Not Available')}`);
+  tags.push(`Risk Score: ${_.get(body, 'risk_score.result', 'Not Available')}`);
   tags.push(
-    `Detection Ratio: ${get(body, 'blacklists.detections')} / ${get(
+    `Detection Ratio: ${_.get(body, 'blacklists.detections')} / ${_.get(
       body,
       'blacklists.engines_count'
     )}`
