@@ -16,6 +16,12 @@ sftp.json
 *.classpath
 dependency-reduced-pom.xml
 
+# Ignore VSCode
+*.history
+.history
+*.vscode
+.vscode
+
 # Ignore Excel Files
 *.xlsx
 
@@ -30,3 +36,7 @@ node_modules/
 
 # Ignore private keys
 key/
+
+# Other
+legacy_wrapper.js
+.DS_Store

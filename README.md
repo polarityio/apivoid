@@ -12,9 +12,6 @@ Check out the integration below:
 
 ## APIVoid Integration Options
 
-### APIVoid URL
-Base APIVoid API URL. Defaults to https://endpoint.apivoid.com
-
 ### APIVoid API Key
 Valid APIVoid API Key. Available via login at https://app.apivoid.com/dashboard/api-keys/
 
