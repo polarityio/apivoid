@@ -1,45 +1,19 @@
 'use strict';
 
 const request = require('postman-request');
-const config = require('./config/config');
 const async = require('async');
-const get = require('lodash.get');
-const fs = require('fs');
+const _ = require('lodash');
 
 let Logger;
 let requestWithDefaults;
 
 const MAX_PARALLEL_LOOKUPS = 10;
+const API_URL = 'https://api.apivoid.com/v2';
+const QUOTA_HEADER = 'x-service-quota';
 
 function startup(logger) {
-  let defaults = {};
+  let defaults = { json: true };
   Logger = logger;
-
-  const { cert, key, passphrase, ca, proxy, rejectUnauthorized } = config.request;
-
-  if (typeof cert === 'string' && cert.length > 0) {
-    defaults.cert = fs.readFileSync(cert);
-  }
-
-  if (typeof key === 'string' && key.length > 0) {
-    defaults.key = fs.readFileSync(key);
-  }
-
-  if (typeof passphrase === 'string' && passphrase.length > 0) {
-    defaults.passphrase = passphrase;
-  }
-
-  if (typeof ca === 'string' && ca.length > 0) {
-    defaults.ca = fs.readFileSync(ca);
-  }
-
-  if (typeof proxy === 'string' && proxy.length > 0) {
-    defaults.proxy = proxy;
-  }
-
-  if (typeof rejectUnauthorized === 'boolean') {
-    defaults.rejectUnauthorized = rejectUnauthorized;
-  }
 
   requestWithDefaults = request.defaults(defaults);
 }
@@ -66,22 +40,24 @@ function doLookup(entities, options, cb) {
 
   entities.forEach((entity) => {
     let requestOptions = {
-      method: 'GET',
+      headers: {
+        'X-API-Key': options.apiKey,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
       json: true
     };
 
     if (entity.isIPv4 && isValidIp(entity)) {
-      (requestOptions.uri = `${options.url}/iprep/v1/pay-as-you-go/`),
-        (requestOptions.qs = {
-          key: options.apiKey,
-          ip: entity.value
-        });
+      requestOptions.uri = `${API_URL}/ip-reputation`;
+      requestOptions.body = {
+        ip: entity.value
+      };
     } else if (entity.isDomain) {
-      (requestOptions.uri = `${options.url}/domainbl/v1/pay-as-you-go/`),
-        (requestOptions.qs = {
-          key: options.apiKey,
-          host: entity.value
-        });
+      requestOptions.uri = `${API_URL}/domain-reputation`;
+      requestOptions.body = {
+        host: entity.value
+      };
     } else {
       lookupResults.push({
         entity,
@@ -94,6 +70,8 @@ function doLookup(entities, options, cb) {
 
     tasks.push(function (done) {
       requestWithDefaults(requestOptions, function (error, res, body) {
+        Logger.trace({ headers: res && res.headers ? res.headers : 'None' }, 'Response');
+
         let processedResult = handleRestError(error, entity, res, body);
 
         if (processedResult.error) {
@@ -114,30 +92,26 @@ function doLookup(entities, options, cb) {
     }
 
     results.forEach((result) => {
-      if (
-        !result.body ||
-        result.body === null ||
-        !result.body.success ||
-        result.body.success != true
-      ) {
+      if (!result.body) {
         lookupResults.push({
           entity: result.entity,
           data: null
         });
       } else {
+        const enginesCount = _.get(result, 'body.blacklists.engines_count', 0);
         const validResults = [];
         const unblockedEngines = [];
+
         Logger.trace({ result }, 'Logging lookup results');
 
-        for (let i = 0; i < result.body.data.report.blacklists.engines_count; i++) {
-          const engine = result.body.data.report.blacklists.engines[i];
+        for (let i = 0; i < enginesCount; i++) {
+          const engine = result.body.blacklists.engines[i];
 
-          if (engine.detected === true) {
+          if (engine?.detected === true) {
             validResults.push(engine);
           } else {
             unblockedEngines.push(engine);
           }
-          Logger.trace({ valid: validResults }, 'logging blacklist stuff');
         }
 
         if (options.blocklistedOnly === true && validResults.length === 0) {
@@ -156,8 +130,10 @@ function doLookup(entities, options, cb) {
                 totalResults: result.body,
                 anonymityTags,
                 categoryTags,
+                securityCheckTags: getSecurityCheckTags(result.body),
                 detectedResults: validResults,
-                unblockedEngines
+                unblockedEngines,
+                apiQuota: getApiQuota(result.response)
               }
             }
           });
@@ -172,7 +148,7 @@ function doLookup(entities, options, cb) {
 
 function getCategoryTags(body) {
   const tags = [];
-  const categories = get(body, 'data.report.category', {});
+  const categories = _.get(body, 'category', {});
   Object.keys(categories).forEach((key) => {
     if (categories[key]) {
       tags.push(key.replace('is_', '').replace(/_/g, ' '));
@@ -184,12 +160,11 @@ function getCategoryTags(body) {
 function getAnonymityTags(body) {
   const tags = [];
 
-  const isProxy = get(body, 'data.report.anonymity.is_proxy', false);
-  const isWebProxy = get(body, 'data.report.anonymity.is_webproxy', false);
-  const isVPN = get(body, 'data.report.anonymity.is_vpn', false);
-  const isHosting = get(body, 'data.report.anonymity.is_hosting', false);
-  const isTor = get(body, 'data.report.anonymity.is_tor', false);
-
+  const isProxy = _.get(body, 'anonymity.is_proxy', false);
+  const isWebProxy = _.get(body, 'anonymity.is_webproxy', false);
+  const isVPN = _.get(body, 'anonymity.is_vpn', false);
+  const isHosting = _.get(body, 'anonymity.is_hosting', false);
+  const isTor = _.get(body, 'anonymity.is_tor', false);
   if (isProxy) {
     tags.push('Proxy');
   }
@@ -212,17 +187,126 @@ function getAnonymityTags(body) {
   return tags;
 }
 
+function getSecurityCheckTags(body) {
+  const tags = [];
+
+  const isMostAbusedTld = _.get(body, 'security_checks.is_most_abused_tld', false);
+  const isDomainBlacklisted = _.get(body, 'security_checks.is_domain_blacklisted', false);
+  const isUncommonHostLength = _.get(body, 'security_checks.is_uncommon_host_length', false);
+  const isUncommonDashCharCount = _.get(body, 'security_checks.is_uncommon_dash_char_count', false);
+  const isUncommonDotCharCount = _.get(body, 'security_checks.is_uncommon_dot_char_count', false);
+  const isSuspiciousHomoglyph = _.get(body, 'security_checks.is_suspicious_homoglyph', false);
+  const isPossibleTyposquatting = _.get(body, 'security_checks.is_possible_typosquatting', false);
+  const isUncommonClickableDomain = _.get(
+    body,
+    'security_checks.is_uncommon_clickable_domain',
+    false
+  );
+  const isRiskyCategory = _.get(body, 'security_checks.is_risky_category', false);
+
+  if (isMostAbusedTld) {
+    tags.push('Most Abused TLD');
+  }
+  if (isDomainBlacklisted) {
+    tags.push('Domain Blacklisted');
+  }
+
+  if (isUncommonHostLength) {
+    tags.push('Uncommon Host Length');
+  }
+
+  if (isUncommonDashCharCount) {
+    tags.push('Uncommon Dash Count');
+  }
+
+  if (isUncommonDotCharCount) {
+    tags.push('Uncommon Dot Count');
+  }
+
+  if (isSuspiciousHomoglyph) {
+    tags.push('Suspicious Homoglyph');
+  }
+
+  if (isPossibleTyposquatting) {
+    tags.push('Possible Typosquatting');
+  }
+
+  if (isUncommonClickableDomain) {
+    tags.push('Uncommon Clickable Domain');
+  }
+
+  if (isRiskyCategory) {
+    tags.push('Risky Category');
+  }
+
+  return tags;
+}
+
 function getSummaryTags(body) {
   const tags = [];
-  tags.push(`Risk Score: ${get(body, 'data.report.risk_score.result', 'Not Available')}`);
+  tags.push(`Risk Score: ${_.get(body, 'risk_score.result', 'Not Available')}`);
   tags.push(
-    `Detection Ratio: ${get(body, 'data.report.blacklists.detections')} / ${get(
+    `Detection Ratio: ${_.get(body, 'blacklists.detections')} / ${_.get(
       body,
-      'data.report.blacklists.engines_count'
+      'blacklists.engines_count'
     )}`
   );
 
   return tags;
+}
+
+function getApiQuota(res) {
+  const quota = {};
+
+  // Check if response and headers exist
+  if (!res || !res.headers || !res.headers[QUOTA_HEADER]) {
+    return quota;
+  }
+
+  const quotaHeader = res.headers[QUOTA_HEADER];
+
+  // Check if header is a valid string
+  if (typeof quotaHeader !== 'string' || quotaHeader.trim() === '') {
+    return quota;
+  }
+
+  // Split by semicolon and parse each key-value pair
+  const pairs = quotaHeader.split(';');
+
+  pairs.forEach((pair) => {
+    const trimmedPair = pair.trim();
+    if (!trimmedPair) {
+      return; // Skip empty pairs
+    }
+
+    const equalIndex = trimmedPair.indexOf('=');
+    if (equalIndex === -1) {
+      return; // Skip malformed pairs without '='
+    }
+
+    const key = trimmedPair.substring(0, equalIndex).trim();
+    const value = trimmedPair.substring(equalIndex + 1).trim();
+
+    if (!key) {
+      return; // Skip if key is empty
+    }
+
+    // Convert value to appropriate type
+    // Check for boolean values
+    if (value === 'true') {
+      quota[key] = true;
+    } else if (value === 'false') {
+      quota[key] = false;
+    } else if (value.length > 0 && !isNaN(Number(value))) {
+      // Check if value is a number - ensure it has length and properly converts
+      quota[key] = Number(value);
+    } else {
+      // Keep as string
+      quota[key] = value;
+    }
+  });
+
+  return quota;
 }
 
 function handleRestError(error, entity, res, body) {
@@ -245,7 +329,8 @@ function handleRestError(error, entity, res, body) {
   } else if (res.statusCode === 200 && body) {
     result = {
       entity,
-      body
+      body,
+      response: res
     };
   } else {
     result = {
@@ -274,8 +359,6 @@ function validateOptions(options, callback) {
   let errors = [];
 
   validateOption(errors, options, 'apiKey', 'You must provide a valid API Key.');
-
-  validateOption(errors, options, 'url', 'You must provide a valid APIVoid API url.');
 
   callback(null, errors);
 }
