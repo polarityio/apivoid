@@ -1,0 +1,58 @@
+{
+  "root": {
+    "path": "",
+    "on_null": "return_empty"
+  },
+  "pipeline": [
+    {
+      "op": "copy",
+      "from": "totalResults",
+      "to": "reduced_results.totalResults"
+    },
+    {
+      "op": "copy",
+      "from": "anonymityTags",
+      "to": "reduced_results.anonymityTags"
+    },
+    {
+      "op": "copy",
+      "from": "categoryTags",
+      "to": "reduced_results.categoryTags"
+    },
+    {
+      "op": "copy",
+      "from": "detectedResults",
+      "to": "reduced_results.detectedResults"
+    },
+    {
+      "op": "drop",
+      "paths": [
+        "reduced_results.totalResults.data.report.blacklists.engines",
+        "reduced_results.totalResults.data.report.blacklists.scantime",
+        "reduced_results.totalResults.credits_remained",
+        "reduced_results.totalResults.estimated_queries",
+        "reduced_results.totalResults.elapsed_time",
+        "reduced_results.totalResults.success",
+        "reduced_results.detectedResults[].elapsed"
+      ]
+    },
+    {
+      "op": "project_and_replace",
+      "path": "reduced_results.totalResults.data.report.information",
+      "projection": {
+        "country_name": "$.country_name",
+        "city_name": "$.city_name",
+        "isp": "$.isp",
+        "asn": "$.asn"
+      }
+    },
+    {
+      "op": "prune",
+      "strategy": "empty_values",
+      "target": "reduced_results"
+    }
+  ],
+  "output": {
+    "result": "$working.reduced_results"
+  }
+}

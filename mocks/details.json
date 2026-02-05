@@ -1,0 +1,169 @@
+{
+  "totalResults": {
+    "data": {
+      "report": {
+        "ip": "192.168.1.1",
+        "risk_score": {
+          "result": 87
+        },
+        "blacklists": {
+          "engines_count": 85,
+          "detections": 12,
+          "detection_rate": "14%",
+          "reference": "https://www.apivoid.com/iprep/",
+          "engines": [
+            {
+              "engine": "Abuse.ch",
+              "detected": true,
+              "reference": "https://abuse.ch/",
+              "elapsed": "0.02"
+            },
+            {
+              "engine": "AlienVault",
+              "detected": true,
+              "reference": "https://www.alienvault.com/",
+              "elapsed": "0.03"
+            },
+            {
+              "engine": "Spamhaus",
+              "detected": false,
+              "reference": "https://www.spamhaus.org/",
+              "elapsed": "0.01"
+            }
+          ],
+          "scantime": "2.34"
+        },
+        "information": {
+          "reverse_dns": "malicious-server.example.com",
+          "continent_code": "NA",
+          "continent_name": "North America",
+          "country_code": "US",
+          "country_name": "United States",
+          "country_currency": "USD",
+          "country_calling_code": "1",
+          "region_name": "California",
+          "city_name": "Los Angeles",
+          "latitude": 34.0522,
+          "longitude": -118.2437,
+          "isp": "Evil Hosting Ltd",
+          "asn": "AS12345"
+        },
+        "anonymity": {
+          "is_proxy": true,
+          "is_webproxy": false,
+          "is_vpn": true,
+          "is_hosting": true,
+          "is_tor": false
+        },
+        "category": {
+          "is_safe": false,
+          "is_tor": false,
+          "is_proxy": true,
+          "is_vpn": true,
+          "is_webproxy": false
+        }
+      }
+    },
+    "credits_remained": 4567.89,
+    "estimated_queries": "4567",
+    "elapsed_time": "2.45",
+    "success": true
+  },
+  "anonymityTags": [
+    "Proxy",
+    "VPN",
+    "Hosting"
+  ],
+  "categoryTags": [
+    "proxy",
+    "vpn"
+  ],
+  "detectedResults": [
+    {
+      "engine": "Abuse.ch",
+      "detected": true,
+      "reference": "https://abuse.ch/",
+      "elapsed": "0.02"
+    },
+    {
+      "engine": "AlienVault",
+      "detected": true,
+      "reference": "https://www.alienvault.com/",
+      "elapsed": "0.03"
+    },
+    {
+      "engine": "Botvrij.eu",
+      "detected": true,
+      "reference": "https://botvrij.eu/",
+      "elapsed": "0.01"
+    },
+    {
+      "engine": "CRDF",
+      "detected": true,
+      "reference": "https://threatcenter.crdf.fr/",
+      "elapsed": "0.02"
+    },
+    {
+      "engine": "Cyber Crime Tracker",
+      "detected": true,
+      "reference": "http://cybercrime-tracker.net/",
+      "elapsed": "0.03"
+    },
+    {
+      "engine": "EmergingThreats",
+      "detected": true,
+      "reference": "https://rules.emergingthreats.net/",
+      "elapsed": "0.01"
+    },
+    {
+      "engine": "Feodo Tracker",
+      "detected": true,
+      "reference": "https://feodotracker.abuse.ch/",
+      "elapsed": "0.02"
+    },
+    {
+      "engine": "MalwareWorld",
+      "detected": true,
+      "reference": "http://malwareworld.com/",
+      "elapsed": "0.01"
+    },
+    {
+      "engine": "Phishing Database",
+      "detected": true,
+      "reference": "http://phishing-database.com/",
+      "elapsed": "0.03"
+    },
+    {
+      "engine": "Spam404",
+      "detected": true,
+      "reference": "https://www.spam404.com/",
+      "elapsed": "0.02"
+    },
+    {
+      "engine": "Threatlog",
+      "detected": true,
+      "reference": "http://www.threatlog.com/",
+      "elapsed": "0.01"
+    },
+    {
+      "engine": "URLhaus",
+      "detected": true,
+      "reference": "https://urlhaus.abuse.ch/",
+      "elapsed": "0.02"
+    }
+  ],
+  "unblockedEngines": [
+    {
+      "engine": "Spamhaus",
+      "detected": false,
+      "reference": "https://www.spamhaus.org/",
+      "elapsed": "0.01"
+    },
+    {
+      "engine": "Barracuda",
+      "detected": false,
+      "reference": "https://www.barracuda.com/",
+      "elapsed": "0.01"
+    }
+  ]
+}
